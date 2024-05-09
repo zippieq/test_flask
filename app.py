@@ -92,8 +92,6 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 '''
-Got this error when attempting to register user
-sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: user.password
-[SQL: INSERT INTO user (username, password) VALUES (?, ?)]
-[parameters: ('nat', None)]
+Got this error when attempting to login user
+AttributeError: 'User' object has no attribute 'password_hash'
 '''
