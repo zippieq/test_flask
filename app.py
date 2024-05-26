@@ -20,7 +20,7 @@ login_manager.login_view = 'login'
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    password_hash = db.Column(db.String(100), nullable=False)  
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -30,7 +30,7 @@ class User(UserMixin, db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.query.get(int(user_id))
+    return User.query.get(int(user_id))
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -54,11 +54,10 @@ class LoginForm(FlaskForm):
 def home():
     return render_template('home.html', title='Home')
 
-# TODO: implement register route here
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('home'))
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(username=form.username.data)
@@ -67,11 +66,11 @@ def register():
         db.session.commit()
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
-# TODO: implement login route here
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('home'))
     form = LoginForm()
     if form.validate_on_submit():
         user = db.session.scalar(sa.select(User).where(User.username == form.username.data))
@@ -80,7 +79,7 @@ def login():
         login_user(user)
         return redirect(url_for('home'))
     return render_template('login.html', title='Sign In', form=form)
-# TODO: implement logout route here
+
 @app.route('/logout')
 def logout():
     logout_user()
@@ -90,8 +89,3 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
-
-'''
-Got this error when attempting to login user
-AttributeError: 'User' object has no attribute 'password_hash'
-'''
